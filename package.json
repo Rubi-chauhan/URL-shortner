@@ -15,7 +15,9 @@
     "index.js": "^0.0.3",
     "mongoose": "^6.3.3",
     "nodemon": "^2.0.16",
+    "redis": "^3.1.2",
     "shortid": "^2.2.16",
+    "util.promisify": "^1.1.1",
     "valid-url": "^1.0.9"
   }
 }

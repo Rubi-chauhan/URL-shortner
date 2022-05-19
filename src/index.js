@@ -12,7 +12,7 @@ mongoose.connect("mongodb+srv://Rubi_db:T2P9R5d5lWl7SRAF@cluster0.tvyoi.mongodb.
     useNewUrlParser : true
 })
 
-.then(()=>"MongoDB is connected")
+.then(()=>console.log("MongoDB is connected"))
 .catch(err=>console.log(err))
 
 app.listen(process.env.port || port, function() {
