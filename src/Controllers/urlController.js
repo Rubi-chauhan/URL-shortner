@@ -126,19 +126,19 @@ const getUrl = async function (req, res) {
 
         if (newCode) {
 
-            return res.status(302).redirect(newCode)
+            return res.status(302).redirect(newCode.longUrl)
 
         }else{
 
-        let newUrl = await urlModel.findOne({ urlCode: urlCode })
+        let newUrl = await urlModel.findOne({ urlCode: req.params.urlCode })
 
-        if (newUrl) {
+        if (!newUrl) {
+            return res.status(404).send({ status: false, message: "URL not found" })
+        }else{
             await SET_ASYNC(`${req.params.urlCode}`, JSON.stringify(newUrl))
             return res.status(302).redirect(newUrl.longUrl);
         }
-        else {
-            return res.status(404).send({ status: false, message: "URL not found" })
-        }
+        
     }
 
 
