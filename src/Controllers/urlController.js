@@ -59,8 +59,8 @@ const createShortUrl = async function (req, res) {
         if (!isValid(longUrl))
             return res.status(400).send({ status: false, message: "longUrl is required." })
 
-        if (!urlRegex.test(longUrl.trim()))
-            return res.status(400).send({ status: false, message: " Please provide valid Url." })
+        // if (!urlRegex.test(longUrl.trim()))
+        //     return res.status(400).send({ status: false, message: " Please provide valid Url." })
 
         let baseUrl = "http://localhost:3000"
 
@@ -76,7 +76,7 @@ const createShortUrl = async function (req, res) {
         }
 
 
-        const alreadyExistUrl = await urlModel.findOne({ longUrl: longUrl })
+        const alreadyExistUrl = await urlModel.findOne({ longUrl: longUrl }).select({_id:0, createdAt:0, updatedAt:0, __v:0})
 
         if (alreadyExistUrl) {
 
@@ -106,7 +106,7 @@ const createShortUrl = async function (req, res) {
             urlCode: urlCode
         }
 
-        const createUrl = await urlModel.create(generateUrl).select({_id:0, createdAt:0, updatedAt:0, __v:0})
+        const createUrl = await urlModel.create(generateUrl)
 
 
         return res.status(201).send({ status: false, message: "Successfully created", data: createUrl })
