@@ -4,7 +4,7 @@ const validUrl = require('valid-url')
 const redis = require("redis");
 
 const { promisify } = require("util");
-const { url } = require('inspector');
+
 
 //Connect to redis
 const redisClient = redis.createClient(
@@ -28,6 +28,9 @@ redisClient.on("connect", async function () {
 //Connection setup for redis
 
 
+const isValidRequestBody = function (request) {
+    return (Object.keys(request).length > 0)
+}
 
 const isValid = function (value) {
     if (typeof value === 'undefined' || value === null) return false
@@ -36,9 +39,6 @@ const isValid = function (value) {
     return true
 }
 
-const isValidRequestBody = function (request) {
-    return (Object.keys(request).length > 0)
-}
 
 
 const urlRegex = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/                                      // /^(ftp|http|https):\/\/[^ "]+$/
@@ -78,7 +78,7 @@ const createShortUrl = async function (req, res) {
         if (alreadyExistUrl) {
 
             await SET_ASYNC(`${longUrl}`, JSON.stringify(alreadyExistUrl))
-            return res.status(400).send({ status: false, message: `${longUrl} is already exist` })
+            return res.status(400).send({ status: false, message: " Long url is already exist" })
         }
 
         let shortUrlCode = shortid.generate()
@@ -86,7 +86,7 @@ const createShortUrl = async function (req, res) {
         const alreadyExistCode = await urlModel.findOne({ urlCode: shortUrlCode })
 
         if (alreadyExistCode)
-            return res.status(400).send({ status: false, message: "Short Code is already exist" })
+            return res.status(400).send({ status: false, message: "Url Code is already exist" })
 
         let shortUrl = baseUrl + '/' + shortUrlCode
 
@@ -117,8 +117,8 @@ const getorignalUrl = async function (req, res) {
     try {
         let url = req.params.urlCode
 
-        // if (!isValid(url))
-        //     return res.status(400).send({ status: false, message: "Url is required." })
+        if (!isValid(url))
+            return res.status(400).send({ status: false, message: "Url is required." })
 
 
         let urlCode = await GET_ASYNC(`${req.params.urlCode}`)
@@ -126,9 +126,9 @@ const getorignalUrl = async function (req, res) {
 
         if (newCode) {
 
-            return res.status(302).redirect(newCode.longUrl)
+            return res.status(302).redirect(newCode)
 
-        }
+        }else{
 
         let newUrl = await urlModel.findOne({ urlCode: url })
 
@@ -139,10 +139,8 @@ const getorignalUrl = async function (req, res) {
         else {
             return res.status(400).send({ status: false, message: "URL not found" })
         }
+    }
 
-        // else{
-        //     return res.status(404).send({status:false, message: "Bad request"})
-        // }
 
 
 
