@@ -64,9 +64,9 @@ const createShortUrl = async function (req, res) {
         if (!validUrl.isUri(baseUrl))
             return res.status(400).send({ status: false, message: "base Url is invalid " })
 
-        const catchedData = await GET_ASYNC(`${longUrl}`)
+        const cachedData = await GET_ASYNC(`${longUrl}`)
 
-        const newData = JSON.parse(catchedData)
+        const newData = JSON.parse(cachedData)
 
         if (newData) {
             return res.status(200).send({ status: true, data: newData })
