@@ -1,12 +1,6 @@
 const mongoose = require ("mongoose")
 
 
-
-let validateUrl = function(longUrl) {
-    let longUrlRegex = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/ ;
-    return longUrlRegex.test(longUrl)
-}
-
 const urlSchema = new mongoose.Schema({
        
      urlCode : {
@@ -19,8 +13,8 @@ const urlSchema = new mongoose.Schema({
     longUrl: {
         type: String,
         required: [true, " longUrl is required"], 
-        trim : true,
-        validate:[validateUrl, "Please enter a valid Url"]
+        trim : true
+        
     },
     shortUrl: {
         type: String,

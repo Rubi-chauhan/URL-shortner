@@ -41,7 +41,6 @@ const isValid = function (value) {
 
 
 
-const urlRegex = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/                                      // /^(ftp|http|https):\/\/[^ "]+$/
 
 const SET_ASYNC = promisify(redisClient.SET).bind(redisClient);
 const GET_ASYNC = promisify(redisClient.GET).bind(redisClient);
@@ -59,9 +58,7 @@ const createShortUrl = async function (req, res) {
         if (!isValid(longUrl))
             return res.status(400).send({ status: false, message: "longUrl is required." })
 
-        // if (!urlRegex.test(longUrl.trim()))
-        //     return res.status(400).send({ status: false, message: " Please provide valid Url." })
-
+        
         let baseUrl = "http://localhost:3000"
 
         if (!validUrl.isUri(baseUrl))
@@ -106,10 +103,11 @@ const createShortUrl = async function (req, res) {
             urlCode: urlCode
         }
 
-        const createUrl = await urlModel.create(generateUrl)
+        await urlModel.create(generateUrl)
+        const createShortUrl = await urlModel.findOne({longUrl:longUrl}).select({_id:0, createdAt:0, updatedAt:0, __v:0})
+        await SET_ASYNC(`${longUrl}`,  JSON.stringify(createShortUrl))
 
-
-        return res.status(201).send({ status: false, message: "Successfully created", data: createUrl })
+        return res.status(201).send({ status: false, message: "Successfully created", data: createShortUrl })
 
 
 
@@ -121,13 +119,9 @@ const createShortUrl = async function (req, res) {
 
 const getUrl = async function (req, res) {
     try {
-        let url = req.params.urlCode
-
-        if (!isValid(url))
-            return res.status(400).send({ status: false, message: "Url is required." })
-
 
         let urlCode = await GET_ASYNC(`${req.params.urlCode}`)
+
         let newCode = JSON.parse(urlCode)
 
         if (newCode) {
@@ -136,14 +130,14 @@ const getUrl = async function (req, res) {
 
         }else{
 
-        let newUrl = await urlModel.findOne({ urlCode: url })
+        let newUrl = await urlModel.findOne({ urlCode: urlCode })
 
         if (newUrl) {
-            await SET_ASYNC(`${req.params.urlCode}`, JSON.stringify(newUrl.longUrl))
+            await SET_ASYNC(`${req.params.urlCode}`, JSON.stringify(newUrl))
             return res.status(302).redirect(newUrl.longUrl);
         }
         else {
-            return res.status(400).send({ status: false, message: "URL not found" })
+            return res.status(404).send({ status: false, message: "URL not found" })
         }
     }
 
