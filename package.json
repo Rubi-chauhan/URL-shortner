@@ -19,5 +19,8 @@
     "shortid": "^2.2.16",
     "util.promisify": "^1.1.1",
     "valid-url": "^1.0.9"
+  },
+  "devDependencies": {
+    "@types/redis": "^4.0.11"
   }
 }

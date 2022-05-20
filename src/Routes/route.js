@@ -7,6 +7,6 @@ router.get("/test-me", function (req, res) {
 })
 
 router.post("/url/shorten",urlController.createShortUrl)
-router.get("/:urlCode",urlController.getorignalUrl)
+router.get("/:urlCode",urlController.getUrl)
 
 module.exports = router

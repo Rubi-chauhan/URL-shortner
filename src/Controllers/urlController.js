@@ -1,7 +1,7 @@
 const urlModel = require('../Models/urlModel')
 const shortid = require('shortid')
 const validUrl = require('valid-url')
-const redis = require("redis");
+const redis = require('redis')
 
 const { promisify } = require("util");
 
@@ -68,8 +68,11 @@ const createShortUrl = async function (req, res) {
             return res.status(400).send({ status: false, message: "base Url is invalid " })
 
         const catchedData = await GET_ASYNC(`${longUrl}`)
-        if (catchedData) {
-            return res.status(200).send({ status: true, data: catchedData })
+
+        const newData = JSON.parse(catchedData)
+
+        if (newData) {
+            return res.status(200).send({ status: true, data: newData })
         }
 
 
@@ -78,29 +81,32 @@ const createShortUrl = async function (req, res) {
         if (alreadyExistUrl) {
 
             await SET_ASYNC(`${longUrl}`, JSON.stringify(alreadyExistUrl))
-            return res.status(400).send({ status: false, message: " Long url is already exist" })
+
+            return res.status(400).send({ status: false, message: `${longUrl} is already exist` })
         }
 
-        let shortUrlCode = shortid.generate()
+        let urlCode = shortid.generate()
 
-        const alreadyExistCode = await urlModel.findOne({ urlCode: shortUrlCode })
+        const alreadyExistCode = await urlModel.findOne({ urlCode: urlCode })
 
         if (alreadyExistCode)
-            return res.status(400).send({ status: false, message: "Url Code is already exist" })
+            return res.status(400).send({ status: false, message: `${urlCode} is already exist` })
 
-        let shortUrl = baseUrl + '/' + shortUrlCode
+        let shortUrl = baseUrl + '/' + urlCode
 
         const alreadyShortUrl = await urlModel.findOne({ shortUrl: shortUrl })
+
         if (alreadyShortUrl)
-            return res.status(400).send({ status: false, message: `${shortUrl} is already exist` })
+
+            return res.status(200).send({ status: false, message: `${shortUrl} is already exist` })
 
         const generateUrl = {
             longUrl: longUrl,
             shortUrl: shortUrl,
-            urlCode: shortUrlCode
+            urlCode: urlCode
         }
 
-        const createUrl = await urlModel.create(generateUrl)
+        const createUrl = await urlModel.create(generateUrl).select({_id:0, createdAt:0, updatedAt:0, __v:0})
 
 
         return res.status(201).send({ status: false, message: "Successfully created", data: createUrl })
@@ -113,7 +119,7 @@ const createShortUrl = async function (req, res) {
     }
 }
 
-const getorignalUrl = async function (req, res) {
+const getUrl = async function (req, res) {
     try {
         let url = req.params.urlCode
 
@@ -153,4 +159,4 @@ const getorignalUrl = async function (req, res) {
 
 
 module.exports.createShortUrl = createShortUrl
-module.exports.getorignalUrl = getorignalUrl
+module.exports.getUrl = getUrl
